@@ -1,0 +1,13 @@
+version: "1.0"
+
+services:
+  app:
+    container_name: react-boilerplate-with-docker
+    image: react-boilerplate-with-docker
+    build:
+      context: .
+      target: development
+    volumes:
+      - ./src:/app/src
+    ports:
+      - 3000:3000
