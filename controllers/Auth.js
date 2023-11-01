@@ -3,7 +3,7 @@
 const User = require('../model/User');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-
+const nodemailer = require('nodemailer');
 // User registration
 exports.register = async (req, res) => {
   const { name, email, password } = req.body;
@@ -41,3 +41,56 @@ exports.login = async (req, res) => {
     res.status(500).json({ error: 'Authentication failed' });
   }
 };
+
+
+exports.forgetPassword = async (req,res) => {
+  
+  const { email } = req.body;
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Generate a unique token for resetting password (this token will be sent to the user's email)
+    const resetToken = user.generatePasswordResetToken();
+    // Save the token and expiration time in the user object (in the database)
+    await user.save();
+
+    // Send email with the reset link
+    const testAccount = await nodemailer.createTestAccount();
+
+    // Create a nodemailer transporter using the Ethereal test account
+    const transporter = nodemailer.createTransport({
+      host: 'smtp.ethereal.email',
+      port: 587,
+      secure: false,
+      auth: {
+        user: testAccount.user,
+        pass: testAccount.pass
+      }
+    });
+
+    const mailOptions = {
+      from: 'shashikant.chauhan@yopmail.com',
+      to: user.email,
+      subject: 'Password Reset Link',
+      text: `To reset your password, click this link: http://localhost:/${resetToken}`
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.log(error);
+        res.status(500).json({ message: 'Error sending email' });
+      } else {
+        console.log('Email sent: ' + info.response);
+        res.status(200).json({ message: 'Password reset link sent to your email' });
+      }
+    });
+    res.status(200).json({ message: 'Password reset link sent to your email' });
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: error });
+  }
+}

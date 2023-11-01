@@ -1,5 +1,6 @@
 const bcrypt = require('bcrypt');
 const mongoose = require("mongoose");
+var crypto = require('crypto');
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -16,6 +17,9 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  resetPasswordToken: String,
+  resetPasswordExpires: Date
+
 });
 
 // Hash the password before saving
@@ -29,6 +33,17 @@ userSchema.pre('save', async function (next) {
     next(error);
   }
 });
+
+userSchema.methods.generatePasswordResetToken = function() {
+  // Create a unique token using Node's crypto library
+  const token = crypto.randomBytes(20).toString('hex');
+  this.resetPasswordToken = token;
+  // Set expiration time for the token (e.g., 1 hour)
+  this.resetPasswordExpires = Date.now() + 3600000; // Token expires in 1 hour
+
+  return token;
+};
+
 
 const User = mongoose.model('User', userSchema);
 
