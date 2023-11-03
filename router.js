@@ -31,4 +31,6 @@ router.delete("/todos/:todoID",authenticateToken, deleteTodo);
 router.post('/register', authController.register);
 router.post('/login', authController.login);
 router.post('/forget-password', authController.forgetPassword);
+router.post('/reset-pw', authController.resetPassword);
+
 module.exports = router;

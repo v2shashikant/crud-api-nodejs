@@ -49,7 +49,7 @@ exports.forgetPassword = async (req,res) => {
   try {
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ error: 'User not found' });
     }
 
     // Generate a unique token for resetting password (this token will be sent to the user's email)
@@ -81,7 +81,7 @@ exports.forgetPassword = async (req,res) => {
     transporter.sendMail(mailOptions, (error, info) => {
       if (error) {
         console.log(error);
-        res.status(500).json({ message: 'Error sending email' });
+        res.status(500).json({ error: 'Error sending email' });
       } else {
         console.log('Email sent: ' + info.response);
         res.status(200).json({ message: 'Password reset link sent to your email' });
@@ -91,6 +91,33 @@ exports.forgetPassword = async (req,res) => {
 
   } catch (error) {
     console.log(error);
-    res.status(500).json({ message: error });
+    res.status(500).json({ error: error });
   }
+}
+
+exports.resetPassword = async (req,res) => {
+  const { token, password } = req.body;
+
+  try {
+    const user = await User.findOne({
+      resetPasswordToken: token,
+      resetPasswordExpires: { $gt: Date.now() }
+    });
+
+    if (!user) {
+      return res.status(400).json({ error: 'Invalid or expired token. Please request a new password reset.' });
+    }
+
+    // Update the user's password and reset the token fields
+    user.password = password;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+
+    await user.save();
+
+    res.status(200).json({ message: 'Password reset successful' });
+  } catch (error) {
+    res.status(500).json({ error: 'An error occurred. Please try again.' });
+  }
+
 }
