@@ -1,6 +1,5 @@
 # This project is used for crud api of todo task list.
-
-# min version for node is 12.* for this project.
+min version for node is 12.* for this project.
 ```bash
 git clone
 ```
@@ -8,8 +7,7 @@ git clone
 cp .env.example .env
 ```
 ## Instruction to update
-add mongo db url in env file 
-add JWT_SECRET  in env file 
+add mongo db url in env file and add JWT_SECRET.
 Setup 
 ```bash
 npm install
