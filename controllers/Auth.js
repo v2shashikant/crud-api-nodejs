@@ -8,7 +8,14 @@ const nodemailer = require('nodemailer');
 exports.register = async (req, res) => {
   const { name, email, password } = req.body;
   try {
+
+    const userFind = await User.findOne({ email });
+    if (userFind) {
+      return res.status(401).json({ error: 'Email is already register.' });
+    }
+
     const user = new User({ name, email, password });
+
     await user.save();
     res.status(200).json({ message: 'User registered successfully' });
   } catch (error) {
