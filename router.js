@@ -2,6 +2,8 @@ const router = require("express").Router();
 const jwt = require('jsonwebtoken');
 
 const { getTodos,createTodo,updateTodo,deleteTodo } = require("./controllers/Todo");
+const { getEmployees,getEmployee,createEmployee,updateEmployee,deleteEmployee } = require("./controllers/Employee");
+
 const authController = require('./controllers/Auth');
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
@@ -33,4 +35,9 @@ router.post('/login', authController.login);
 router.post('/forget-password', authController.forgetPassword);
 router.post('/reset-pw', authController.resetPassword);
 
+router.get("/employees/:employeeID",authenticateToken, getEmployee);
+router.get("/employees",authenticateToken, getEmployees);
+router.post("/employees", authenticateToken,createEmployee);
+router.put("/employees/:employeeID",authenticateToken, updateEmployee);
+router.delete("/employees/:employeeID",authenticateToken, deleteEmployee);
 module.exports = router;
